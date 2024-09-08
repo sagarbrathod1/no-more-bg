@@ -13,6 +13,7 @@ import { Images } from "./components/Images";
 import { db } from "./db";
 import { processImages } from "./lib/process";
 import React from "react";
+import { Footer } from "./components/Footer";
 
 export default function App() {
   const [images, setImages] = useState([]);
@@ -186,29 +187,6 @@ export default function App() {
             🤗 Transformers.js
           </a>
         </h2>
-        <div className="flex justify-center mb-8 gap-8">
-          <a
-            className="underline"
-            target="_blank"
-            href="https://github.com/huggingface/transformers.js-examples/blob/main/LICENSE"
-          >
-            License (Apache 2.0)
-          </a>
-          <a
-            className="underline"
-            target="_blank"
-            href="https://huggingface.co/Xenova/modnet"
-          >
-            Model (MODNet)
-          </a>
-          <a
-            className="underline"
-            target="_blank"
-            href="https://github.com/huggingface/transformers.js-examples/tree/main/remove-background-webgpu/"
-          >
-            Code (GitHub)
-          </a>
-        </div>
         <div
           {...getRootProps()}
           className={`p-8 mb-8 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors duration-300 ease-in-out
@@ -285,6 +263,7 @@ export default function App() {
             </div>
           ))}
         </div>
+        <Footer />
       </div>
     </div>
   );
