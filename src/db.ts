@@ -3,7 +3,7 @@ import Dexie, { type EntityTable } from "dexie";
 interface Image {
   id: number;
   file: File;
-  processedFile?: File | null;
+  processedFile?: File | null | string;
   name?: string;
 }
 

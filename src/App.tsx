@@ -53,7 +53,7 @@ export default function App() {
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     for (const file of acceptedFiles) {
-      const id = await db.images.add({ file, processedFile: null });
+      const id = await db.images.add({ file, processedFile: "null" });
       console.log(`Added image with id ${id}`);
     }
     await processImages();
