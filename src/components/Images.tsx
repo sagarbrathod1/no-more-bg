@@ -10,28 +10,9 @@ export function Images() {
       <h2>Images: {images?.length}</h2>
       <div className="gap-2 grid grid-cols-4">
         {images?.map((image) => {
-          if (image.file.type.includes("video")) {
-            return <Video video={image} key={image.id} />;
-          } else {
-            return <ImageSpot image={image} key={image.id} />;
-          }
+          return <ImageSpot image={image} key={image.id} />;
         })}
       </div>
-    </div>
-  );
-}
-
-function Video({ video }: { video: Image }) {
-  const url = URL.createObjectURL(video.file);
-  return (
-    <div className="">
-      <video
-        className="rounded-lg aspect-square object-cover"
-        loop
-        muted
-        autoPlay
-        src={url}
-      ></video>
     </div>
   );
 }
@@ -40,7 +21,7 @@ function ImageSpot({ image }: { image: Image }) {
   const imageProcessed = image.processedFile instanceof File;
   const url = URL.createObjectURL(image.file);
   const processedURL =
-    imageProcessed && image.processedFile
+    imageProcessed && image.processedFile instanceof File
       ? URL.createObjectURL(image.processedFile)
       : "";
 
@@ -61,7 +42,14 @@ function ImageSpot({ image }: { image: Image }) {
       </div>
       <div className="controls">
         <button onClick={() => db.images.delete(image.id)}>Delete</button>
-        <a href={processedURL} download={image.processedFile?.name}>
+        <a
+          href={processedURL}
+          download={
+            image.processedFile instanceof File
+              ? image.processedFile.name
+              : undefined
+          }
+        >
           Download
         </a>
       </div>

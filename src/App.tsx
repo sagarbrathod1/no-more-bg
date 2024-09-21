@@ -7,21 +7,16 @@ import {
 } from "@huggingface/transformers";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { saveAs } from "file-saver";
-import JSZip from "jszip";
-import { Images } from "./components/Images";
 import { db } from "./db";
 import { processImages } from "./lib/process";
 import React from "react";
-import { Footer } from "./components/Footer";
+import { Images } from "./components/Images";
 
 export default function App() {
-  const [images, setImages] = useState([]);
-  const [processedImages, setProcessedImages] = useState([]);
-  const [isDownloadReady, setIsDownloadReady] = useState(false);
+  const [images] = useState([]);
+  const [processedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-
   const modelRef = useRef<PreTrainedModel | null>(null);
   const processorRef = useRef<Processor | null>(null);
 
@@ -72,75 +67,6 @@ export default function App() {
     },
   });
 
-  const removeImage = (index: number) => {
-    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
-    setProcessedImages((prevProcessed) =>
-      prevProcessed.filter((_, i) => i !== index)
-    );
-  };
-
-  const downloadAsZip = async () => {
-    const zip = new JSZip();
-    const promises = images.map(
-      (image, i) =>
-        new Promise<void>((resolve) => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-
-          if (!ctx) {
-            console.error("Unable to get 2D context for canvas");
-            resolve();
-            return;
-          }
-
-          const img = new Image();
-          img.src = processedImages[i] || image;
-
-          img.onload = () => {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob((blob) => {
-              if (blob) {
-                zip.file(`image-${i + 1}.png`, blob);
-              }
-              resolve();
-            }, "image/png");
-          };
-        })
-    );
-
-    await Promise.all(promises);
-
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "images.zip");
-  };
-
-  const clearAll = () => {
-    setImages([]);
-    setProcessedImages([]);
-    setIsDownloadReady(false);
-    db.images.where("id").above(0).delete();
-  };
-
-  const copyToClipboard = async (url: string | URL | Request) => {
-    try {
-      // Fetch the image from the URL and convert it to a Blob
-      const response = await fetch(url);
-      const blob = await response.blob();
-
-      // Create a clipboard item with the image blob
-      const clipboardItem = new ClipboardItem({ [blob.type]: blob });
-
-      // Write the clipboard item to the clipboard
-      await navigator.clipboard.write([clipboardItem]);
-
-      console.log("Image copied to clipboard");
-    } catch (err) {
-      console.error("Failed to copy image: ", err);
-    }
-  };
-
   const downloadImage = (url: string) => {
     const link = document.createElement("a");
     link.href = url;
@@ -176,15 +102,14 @@ export default function App() {
     <div className="min-h-screen text-white p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold mb-2 text-center">No More BG</h1>
-
         <h2 className="text-lg font-semibold mb-2 text-center">
-          In-browser background removal, powered by{" "}
+          Client-side background removal, powered by 🤗{" "}
           <a
             className="underline"
             target="_blank"
             href="https://github.com/xenova/transformers.js"
           >
-            🤗 Transformers.js
+            Transformers.js
           </a>
         </h2>
         <div
@@ -207,23 +132,6 @@ export default function App() {
           </p>
           <p className="text-sm text-gray-400">or click to select files</p>
         </div>
-        <div className="flex flex-col items-center gap-4 mb-8">
-          <div className="flex gap-4">
-            <button
-              onClick={downloadAsZip}
-              disabled={!isDownloadReady}
-              className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors duration-200 text-sm"
-            >
-              Download as ZIP
-            </button>
-            <button
-              onClick={clearAll}
-              className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-black transition-colors duration-200 text-sm"
-            >
-              Clear All
-            </button>
-          </div>
-        </div>
         <Images />
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {images.map((src, index) => (
@@ -236,15 +144,6 @@ export default function App() {
               {processedImages[index] && (
                 <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
                   <button
-                    onClick={() =>
-                      copyToClipboard(processedImages[index] || src)
-                    }
-                    className="mx-2 px-3 py-1 bg-white text-gray-900 rounded-md hover:bg-gray-200 transition-colors duration-200 text-sm"
-                    aria-label={`Copy image ${index + 1} to clipboard`}
-                  >
-                    Copy
-                  </button>
-                  <button
                     onClick={() => downloadImage(processedImages[index] || src)}
                     className="mx-2 px-3 py-1 bg-white text-gray-900 rounded-md hover:bg-gray-200 transition-colors duration-200 text-sm"
                     aria-label={`Download image ${index + 1}`}
@@ -253,17 +152,9 @@ export default function App() {
                   </button>
                 </div>
               )}
-              <button
-                onClick={() => removeImage(index)}
-                className="absolute top-2 right-2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-opacity-70"
-                aria-label={`Remove image ${index + 1}`}
-              >
-                &#x2715;
-              </button>
             </div>
           ))}
         </div>
-        <Footer />
       </div>
     </div>
   );

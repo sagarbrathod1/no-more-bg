@@ -1,23 +1,16 @@
 import Dexie, { type EntityTable } from "dexie";
 
-interface Image {
+export interface Image {
   id: number;
   file: File;
   processedFile?: File | null | string;
   name?: string;
 }
 
-const db = new Dexie("BackgroundRemoverDb") as Dexie & {
-  images: EntityTable<
-    Image,
-    "id" // primary key "id" (for the typings only)
-  >;
+export const db = new Dexie("NoMoreBgDb") as Dexie & {
+  images: EntityTable<Image, "id">;
 };
 
-// Schema declaration:
 db.version(1).stores({
-  images: "++id, file, processedFile", // primary key "id" (for the runtime!)
+  images: "++id, file, processedFile",
 });
-
-export type { Image };
-export { db };
