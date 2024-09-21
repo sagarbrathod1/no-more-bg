@@ -23,7 +23,6 @@
 .mask:hover {
   mask-size: 0%;
   transition-delay: 0s;
-  /* animation: mask 0.4s 1 ease-in-out; */
 }
 
 .mask.processing {
@@ -32,16 +31,6 @@
   border: 2px solid red;
 }
 
-/* @keyframes mask {
-  0% {
-    mask-size: 100%;
-  }
-  100% {
-    mask-size: 0%;
-  }
-} */
-
 body {
-  /* #5200AE #4062BB gradient */
   background: linear-gradient(135deg, #5200ae, #4062bb);
 }
