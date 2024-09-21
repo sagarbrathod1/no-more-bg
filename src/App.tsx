@@ -103,13 +103,13 @@ export default function App() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold mb-2 text-center">No More BG</h1>
         <h2 className="text-lg font-semibold mb-2 text-center">
-          Client-side background removal, powered by 🤗{" "}
+          Client-side background removal, powered by{" "}
           <a
             className="underline"
             target="_blank"
             href="https://github.com/xenova/transformers.js"
           >
-            Transformers.js
+            🤗 Transformers.js
           </a>
         </h2>
         <div
